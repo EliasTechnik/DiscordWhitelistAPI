@@ -1,0 +1,9 @@
+name: DiscordWhitelistAPI
+version: '1.0-BETA'
+main: dev.ewio.discordWhitelistAPI.DiscordWhitelistAPI
+api-version: '1.21.10'
+prefix: DiscordWhitelistAPI
+load: STARTUP
+authors: [ Elias_Technik ]
+description: A simple plugin to provide an API for the discord bot.
+website: mc.ewio.dev

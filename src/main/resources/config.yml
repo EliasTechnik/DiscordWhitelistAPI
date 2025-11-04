@@ -1,0 +1,4 @@
+# port where the API listens
+port: 8083
+# if blank, the plugin generates a new key on startup
+api-key: ""
