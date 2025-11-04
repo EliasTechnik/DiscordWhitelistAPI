@@ -40,7 +40,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: plugin-jar
+          name: DiscordWhitelistAPI-1.0-BETA-all.jar
           path: .
 
       - name: Create Release
