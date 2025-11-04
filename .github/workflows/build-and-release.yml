@@ -1,0 +1,54 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DiscordWhitelistAPI-1.0-BETA-all.jar
+          path: build/libs/*.jar
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    # nur ausführen, wenn der Push wirklich auf main war
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin-jar
+          path: .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # Release-Titel – hier nehmen wir Commit-SHA, damit er eindeutig ist
+          name: "Build ${ { github.sha } }"
+          tag_name: "build-${{ github.run_number }}"
+          files: "*.jar"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
