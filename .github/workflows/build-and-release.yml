@@ -35,7 +35,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     # nur ausführen, wenn der Push wirklich auf main war
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
