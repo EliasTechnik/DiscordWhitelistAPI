@@ -2,3 +2,9 @@
 port: 8083
 # if blank, the plugin generates a new key on startup
 api-key: ""
+# allowed IP addresses that may access the API endpoints
+# Leave empty list ([]) to disable restriction, otherwise only listed IPs are permitted.
+allowed-ips:
+  - 127.0.0.1
+  - ::1
+  - 172.18.0.1
