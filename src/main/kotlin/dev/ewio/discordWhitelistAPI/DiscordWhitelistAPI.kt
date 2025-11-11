@@ -15,6 +15,7 @@ class DiscordWhitelistAPI : JavaPlugin() {
 
         val apiPort = config.getInt("port", 8080)
         val apiKey = config.getString("api-key") ?: ""
+        val allowedIpList: Set<String> = config.getStringList("allowed-ips").ifEmpty { listOf("127.0.0.1", "::1") }.toSet()
 
         if(apiKey.isBlank()) {
             val newApiKey = generateApiKey()
@@ -26,11 +27,13 @@ class DiscordWhitelistAPI : JavaPlugin() {
         engine = Engine(
             apiPort = apiPort,
             apiKey = config.getString("api-key")!!,
-            service = service
+            service = service,
+            allowedIps = allowedIpList,
+            logger = logger
         )
 
         if(engine.isRunning()){
-            logger.info("Discord Whitelist API is running and listening at http://127.0.0.1:$apiPort")
+            logger.info("Discord Whitelist API is running and listening at http://127.0.0.1:$apiPort (Allowed IPs: ${allowedIpList.joinToString(",")})")
         } else {
             logger.severe("Failed to start Discord Whitelist API on port $apiPort")
         }

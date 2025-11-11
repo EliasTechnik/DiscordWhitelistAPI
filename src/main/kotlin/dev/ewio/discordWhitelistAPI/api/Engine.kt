@@ -19,12 +19,18 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.plugins.origin
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger.logger
+import java.util.logging.Logger
 
 
 class Engine(
     val apiPort: Int,
     val apiKey: String,
     val service: WhitelistService,
+    private val allowedIps: Set<String> = setOf("127.0.0.1", "::1"),
+    val logger: Logger
 ){
     private var serverEngine: NettyApplicationEngine? = null
 
@@ -34,10 +40,20 @@ class Engine(
 
             connector {
                 // nur localhost!
-                host = "127.0.0.1"
+                host = "0.0.0.0"
                 port = apiPort
             }
             module {
+                // IP-Whitelist vor jeglicher Routenverarbeitung prüfen
+                intercept(ApplicationCallPipeline.Plugins) {
+                    val remote = call.request.origin.remoteHost
+                    if (allowedIps.isNotEmpty() && remote !in allowedIps) {
+                        call.respond(HttpStatusCode.Forbidden, mapOf("error" to "forbidden"))
+                        logger.info("Blocked API request from unauthorized IP: $remote")
+                        finish()
+                    }
+                }
+
                 install(ContentNegotiation) {
                     jackson {
                         configure(SerializationFeature.INDENT_OUTPUT, true)
@@ -54,6 +70,7 @@ class Engine(
                         }
 
                         service.addPlayerToWhitelist(name)
+                        logger.info("Added player '$name' to whitelist via API.")
 
                         call.respond(mapOf("status" to "ok"))
                     }
@@ -68,6 +85,7 @@ class Engine(
                         }
 
                         service.removePlayerFromWhitelist(name)
+                        logger.info("Removed player '$name' from whitelist via API.")
 
                         call.respond(mapOf("status" to "ok"))
                     }
